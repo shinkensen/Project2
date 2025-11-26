@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipes - Smart Fridge Manager</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <nav class="dashboard-nav">
+      <div class="nav-brand">
+        <h2>🍎 Smart Fridge</h2>
+      </div>
+      <div class="nav-menu">
+        <a href="dashboard.html" class="nav-item">Dashboard</a>
+        <a href="fridge.html" class="nav-item">My Fridge</a>
+        <a href="recipes.html" class="nav-item active">Recipes</a>
+        <a href="settings.html" class="nav-item">Settings</a>
+      </div>
+      <div class="nav-user">
+        <span id="userEmail"></span>
+        <button id="signoutBtn" class="btn-secondary">Sign Out</button>
+      </div>
+    </nav>
+
+    <main class="dashboard-main">
+      <div class="dashboard-header">
+        <h1>Recipe Suggestions</h1>
+        <button id="generateRecipes" class="btn-primary">🔄 Generate New Recipes</button>
+      </div>
+
+      <div class="recipe-filters">
+        <button class="filter-btn active" data-filter="all">All Recipes</button>
+        <button class="filter-btn" data-filter="minimize-waste">Minimize Waste</button>
+        <button class="filter-btn" data-filter="saved">Saved</button>
+      </div>
+
+      <div id="recipeGrid" class="recipe-grid-full">
+        <p class="empty-state">Loading recipes...</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Recipe Detail Modal -->
+  <div id="recipeModal" class="modal" style="display: none;">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3 id="recipeTitle"></h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <img id="recipeImage" class="recipe-detail-image" alt="">
+        <div class="recipe-detail-content">
+          <div class="recipe-meta">
+            <span id="recipeTime"></span>
+            <span id="recipeServings"></span>
+          </div>
+          <div class="recipe-section">
+            <h4>Ingredients</h4>
+            <ul id="recipeIngredients"></ul>
+          </div>
+          <div class="recipe-section">
+            <h4>Instructions</h4>
+            <div id="recipeInstructions"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="saveRecipe" class="btn-secondary">Save Recipe</button>
+        <button id="closeRecipe" class="btn-primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/recipes.js"></script>
+</body>
+</html>

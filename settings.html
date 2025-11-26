@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - Smart Fridge Manager</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <nav class="dashboard-nav">
+      <div class="nav-brand">
+        <h2>🍎 Smart Fridge</h2>
+      </div>
+      <div class="nav-menu">
+        <a href="dashboard.html" class="nav-item">Dashboard</a>
+        <a href="fridge.html" class="nav-item">My Fridge</a>
+        <a href="recipes.html" class="nav-item">Recipes</a>
+        <a href="settings.html" class="nav-item active">Settings</a>
+      </div>
+      <div class="nav-user">
+        <span id="userEmail"></span>
+        <button id="signoutBtn" class="btn-secondary">Sign Out</button>
+      </div>
+    </nav>
+
+    <main class="dashboard-main">
+      <h1>Settings</h1>
+
+      <div class="settings-container">
+        <section class="settings-section">
+          <h2>Profile Settings</h2>
+          <form id="profileForm" class="settings-form">
+            <div class="form-group">
+              <label for="fullName">Full Name</label>
+              <input type="text" id="fullName" required>
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" disabled>
+            </div>
+            <button type="submit" class="btn-primary">Update Profile</button>
+          </form>
+        </section>
+
+        <section class="settings-section">
+          <h2>Notification Settings</h2>
+          <form id="notificationForm" class="settings-form">
+            <div class="form-group-checkbox">
+              <label class="checkbox-label">
+                <input type="checkbox" id="notificationsEnabled">
+                <span>Enable email notifications</span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label for="notificationDays">Notify me before items expire</label>
+              <select id="notificationDays">
+                <option value="1">1 day before</option>
+                <option value="2">2 days before</option>
+                <option value="3">3 days before</option>
+                <option value="5">5 days before</option>
+                <option value="7">1 week before</option>
+              </select>
+            </div>
+            <button type="submit" class="btn-primary">Save Notification Settings</button>
+          </form>
+        </section>
+
+        <section class="settings-section">
+          <h2>Password</h2>
+          <form id="passwordForm" class="settings-form">
+            <div class="form-group">
+              <label for="newPassword">New Password</label>
+              <input type="password" id="newPassword" minlength="6" required>
+            </div>
+            <div class="form-group">
+              <label for="confirmNewPassword">Confirm New Password</label>
+              <input type="password" id="confirmNewPassword" required>
+            </div>
+            <button type="submit" class="btn-primary">Change Password</button>
+          </form>
+        </section>
+
+        <section class="settings-section danger-zone">
+          <h2>Danger Zone</h2>
+          <p>Once you delete your account, there is no going back.</p>
+          <button id="deleteAccount" class="btn-danger">Delete Account</button>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="messageBox" class="message-box" style="display: none;"></div>
+
+  <script type="module" src="js/settings.js"></script>
+</body>
+</html>
