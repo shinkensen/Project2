@@ -79,33 +79,86 @@ After creating the bucket:
 1. **Click on `fridge-images` bucket** (the one you just created)
 2. **Click "Policies"** tab at the top
 3. **Click "New policy"** button
-4. **For Upload Policy:**
-   - Click "Create policy from template" → "Enable insert for authenticated users only"
-   - Policy name: `Users can upload to own folder`
-   - Click "Review" then "Save policy"
-   
-5. **Add Read Policy:**
-   - Click "New policy" again
-   - Click "For full customization"
-   - Policy name: `Users can read own images`
-   - Target roles: `authenticated`
-   - Policy definition: `SELECT`
-   - WITH CHECK expression:
-   ```sql
-   bucket_id = 'fridge-images' AND (storage.foldername(name))[1] = auth.uid()::text
-   ```
+
+IMPORTANT: Supabase's UI offers several templates, but templates may vary by project or UI version. If you don't see a template called "Enable insert for authenticated users only", use the custom policy flow and paste the SQL expressions below (or create the policies with the UI fields shown). Both approaches are equivalent.
+
+4. **Create an INSERT (upload) policy — via UI or SQL**
+
+- UI (recommended):
+   - Click "New policy" → "For full customization"
+   - Policy name: `Users can insert to own folder`
+   - Role: `authenticated`
+   - Action (Policy definition): `INSERT`
+   - WITH CHECK expression (paste exactly):
+      ```sql
+      bucket_id = 'fridge-images' AND (storage.foldername(name))[1] = auth.uid()
+      ```
    - Click "Review" then "Save policy"
 
-6. **Add Delete Policy:**
-   - Click "New policy"
-   - Policy name: `Users can delete own images`
-   - Target roles: `authenticated`
-   - Policy definition: `DELETE`
-   - WITH CHECK expression:
+- SQL (alternative): Open the **SQL Editor** and run the following three statements to create INSERT/SELECT/DELETE policies for `storage.objects`:
    ```sql
-   bucket_id = 'fridge-images' AND (storage.foldername(name))[1] = auth.uid()::text
+   -- Allow authenticated users to INSERT objects only into their own top-level folder
+   CREATE POLICY "Users can insert to own folder"
+      ON storage.objects
+      FOR INSERT
+      TO authenticated
+      WITH CHECK (
+         bucket_id = 'fridge-images' AND (storage.foldername(name))[1] = auth.uid()
+      );
    ```
+
+5. **Create a SELECT (read) policy**
+
+- UI:
+   - Click "New policy" → "For full customization"
+   - Policy name: `Users can select own objects`
+   - Role: `authenticated`
+   - Action: `SELECT`
+   - USING expression (paste exactly):
+      ```sql
+      bucket_id = 'fridge-images' AND (storage.foldername(name))[1] = auth.uid()
+      ```
    - Click "Review" then "Save policy"
+
+- SQL (alternative):
+   ```sql
+   CREATE POLICY "Users can select own objects"
+      ON storage.objects
+      FOR SELECT
+      TO authenticated
+      USING (
+         bucket_id = 'fridge-images' AND (storage.foldername(name))[1] = auth.uid()
+      );
+   ```
+
+6. **Create a DELETE policy**
+
+- UI:
+   - Click "New policy" → "For full customization"
+   - Policy name: `Users can delete own images`
+   - Role: `authenticated`
+   - Action: `DELETE`
+   - WITH CHECK expression:
+      ```sql
+      bucket_id = 'fridge-images' AND (storage.foldername(name))[1] = auth.uid()
+      ```
+   - Click "Review" then "Save policy"
+
+- SQL (alternative):
+   ```sql
+   CREATE POLICY "Users can delete own objects"
+      ON storage.objects
+      FOR DELETE
+      TO authenticated
+      WITH CHECK (
+         bucket_id = 'fridge-images' AND (storage.foldername(name))[1] = auth.uid()
+      );
+   ```
+
+Notes:
+- `storage.foldername(name)` is a Supabase helper that splits object paths; index `[1]` returns the top-level folder (we use it to ensure each user can only act inside a folder named with their `auth.uid()`).
+- If your front-end uploads objects using the path `${userId}/filename.jpg`, these policies will ensure users can only read/upload/delete objects inside their own folder.
+- After creating policies, test with an authenticated user and try uploading to `fridge-images/<your-uid>/test.jpg` to confirm permissions.
 
 ### 2.5 Get Your API Credentials
 
