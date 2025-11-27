@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - SmartPlate</title>
+  <link rel="stylesheet" href="styles-new.css">
+</head>
+<body>
+  <div class="auth-container fade-in">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h1>🍎</h1>
+        <h2>Start Saving Food!</h2>
+        <p>Join thousands reducing food waste with AI</p>
+      </div>
+
+      <form id="signupForm" class="auth-form">
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <input 
+            type="text" 
+            id="fullName" 
+            required 
+            placeholder="Jamie Oliver"
+            autocomplete="name"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input 
+            type="email" 
+            id="email" 
+            required 
+            placeholder="chef@example.com"
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            required 
+            placeholder="At least 6 characters"
+            autocomplete="new-password"
+            minlength="6"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input 
+            type="password" 
+            id="confirmPassword" 
+            required 
+            placeholder="Re-enter your password"
+            autocomplete="new-password"
+            minlength="6"
+          >
+        </div>
+
+        <label class="checkbox-label">
+          <input type="checkbox" id="agreeTerms" required>
+          <span>I agree to the <a href="#" class="link-secondary">Terms & Privacy Policy</a></span>
+        </label>
+
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+        <button type="submit" class="btn btn-accent btn-block">
+          <span>Create Free Account</span>
+        </button>
+      </form>
+
+      <div class="divider">or</div>
+
+      <div class="auth-footer">
+        Already have an account? <a href="signin-new.html">Sign in</a>
+      </div>
+      
+      <div class="auth-footer mt-2">
+        <a href="index-new.html" class="link-secondary">← Back to home</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/signup.js"></script>
+  <script>
+    // Password validation
+    const form = document.getElementById('signupForm');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const errorMessage = document.getElementById('errorMessage');
+
+    form.addEventListener('submit', function(e) {
+      // Check password match
+      if (password.value !== confirmPassword.value) {
+        e.preventDefault();
+        errorMessage.textContent = 'Passwords do not match';
+        errorMessage.style.display = 'block';
+        confirmPassword.focus();
+        return;
+      }
+
+      // Add loading state
+      const btn = this.querySelector('button[type="submit"]');
+      btn.classList.add('btn-loading');
+      btn.disabled = true;
+    });
+
+    // Clear error on input
+    [password, confirmPassword].forEach(input => {
+      input.addEventListener('input', () => {
+        errorMessage.style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>
