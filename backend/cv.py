@@ -242,3 +242,6 @@ async def get_all_ingredients():
 
 if __name__ == '__main__':
     uvicorn.run('cv:app', host='0.0.0.0', port=8001, reload=True)
+    
+    
+#API URL https://smartplate-xics.onrender.com

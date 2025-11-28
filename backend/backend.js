@@ -66,14 +66,38 @@ conn.post('uploadImage',auth,async(req,res)=>{
         if (error) {
             return res.status(500).json({ error: error.message });
         }
-        res.json({filePath: data.path});
+        const response = await fetch("https://smartplate-xics.onrender.com/detect", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                bucket: "user-images"
+            })
+            });
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}: ${await response.text()}`);
+            }
+            const data1 = await response.json();
+            console.log("Detection result:", data1);
+            // Example call
+            res.status(200).jsonm
     }
     catch (e){
         res.status(500).json({error: e.message});
     }
     
 });
+
+
+
+
+
+
+
+
+
 conn.listen(3000,()=>{
     console.log("Successfully running on port 3000");
 })
-
