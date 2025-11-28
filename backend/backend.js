@@ -76,33 +76,3 @@ conn.post('uploadImage',auth,async(req,res)=>{
 conn.listen(3000,()=>{
     console.log("Successfully running on port 3000");
 })
-
-function checkUser(){
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    const userId = localStorage.getItem('userId');
-
-    if (!isLoggedIn || !userId){
-        window.location.href('signup-new.html');
-        return false;
-    }
-    return true;
-}
-
-function logout(){
-    if (confirm('U sure?')){
-        localStorage.removeItem('userId');
-        localStorage.removeItem('userEmail');
-        localStorage.removeItem('isLoggedIn');
-        window.location.href('signin-new.html');
-    }
-}
-
-function logoutBtn(){
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    if (isLoggedIn){
-        const navigate = document.getElementById('logoutBtn');
-        if(navigate && ){
-
-        }
-    }
-}
