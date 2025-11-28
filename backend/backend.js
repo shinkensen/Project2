@@ -44,6 +44,9 @@ async function auth(req, res, next) {
         return res.status(401).json({ error: err.message });
     }
 }
+conn.post('/auth',auth, async(req,res)=>{
+    return res.status(200).json({valid: true});
+})
 conn.post('/uploadImage',auth,async(req,res)=>{
     try{
         const uuid= req.userId;
@@ -87,6 +90,30 @@ conn.post('/uploadImage',auth,async(req,res)=>{
     }
     
 });
+conn.post('/login',async(req,res) =>{
+    const {data,error}  = await supabase.auth.signInWithPassword({
+        email: req.body.email,
+        password: req.body.password, 
+    });
+    if (error){
+        return res.status(500).json({error: error});
+    }
+    else{
+        return res.status(200).json({user: data.user});
+    }
+})
+conn.post('/signup',async(req,res)=>{
+    const {data,error} = await supabase.auth.signUp({
+        email: req.body.email,
+        password: req.body.password,
+    })
+    if (error){
+        return res.status(500).json({error: error});
+    }
+    else{
+        return res.status(200).json({user: data.user});
+    }
+})
 conn.listen(3000,()=>{
     console.log("Successfully running on port 3000");
 })
