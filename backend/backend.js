@@ -88,15 +88,6 @@ conn.post('uploadImage',auth,async(req,res)=>{
     }
     
 });
-
-
-
-
-
-
-
-
-
 conn.listen(3000,()=>{
     console.log("Successfully running on port 3000");
 })
