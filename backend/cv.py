@@ -13,6 +13,7 @@ from supabase import create_client, Client
 
 import sqlite3
 import json
+import uvicorn
 
 # Initialize Supabase client
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
@@ -240,5 +241,4 @@ async def get_all_ingredients():
         raise HTTPException(status_code=500, detail=f'Failed to fetch all ingredients: {e}')
 
 if __name__ == '__main__':
-    import uvicorn
     uvicorn.run('cv:app', host='0.0.0.0', port=8001, reload=True)
