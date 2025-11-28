@@ -11,7 +11,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 /*
 Necessary Endpoints and Pathway essentially
 All are POST
-1. getting the image and uploading it to our supabase bucket - Task assigned to Govind Nair
+1. getting the image and uploading it to our supabase bucket - Task assigned to Govind Nair - DONE
 2. Getting the most recent image from the bucket, running it through a CV model and returning the ingredients - Siddharth Nittur
 3. Storing the ingredients as well as their respective expiry dates somewhere - Koushik
 4. Taking the ingredients and running it through a API like spoontacular and returning the recipes and possibly their nutritional facts - Koushik
@@ -72,7 +72,7 @@ conn.post('uploadImage',auth,async(req,res)=>{
         res.status(500).json({error: e.message});
     }
     
-}); 
+});
 conn.listen(3000,()=>{
     console.log("Successfully running on port 3000");
 })
