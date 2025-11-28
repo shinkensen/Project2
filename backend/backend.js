@@ -1,7 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import express from 'express';
 import cors from 'cors';
-import { supabase } from "../config/supabase";
 import multer from 'multer'
 const url= "https://vyxeojjzxwapzoevbrpb.supabase.co";
 const key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5eGVvamp6eHdhcHpvZXZicnBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNzY1OTYsImV4cCI6MjA3OTc1MjU5Nn0.zn1cG4IpjglAIpwVKNkHre2m3555qbJUwBMFZo-gB9M";
@@ -12,7 +11,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 Necessary Endpoints and Pathway essentially
 All are POST
 1. getting the image and uploading it to our supabase bucket - Task assigned to Govind Nair - DONE
-2. Getting the most recent image from the bucket, running it through a CV model and returning the ingredients - Siddharth Nittur done
+2. Getting the most recent image from the bucket, running it through a CV model and returning the ingredients - Govind Nair done
 3. Storing the ingredients as well as their respective expiry dates somewhere - Koushik done
 4. Taking the ingredients and running it through a API like spoontacular and returning the recipes and possibly their nutritional facts - Koushik
 5. User login/Signup - Koushik Karthik 
@@ -66,7 +65,23 @@ conn.post('uploadImage',auth,async(req,res)=>{
         if (error) {
             return res.status(500).json({ error: error.message });
         }
-        res.json({filePath: data.path});
+        const response = await fetch("https://smartplate-xics.onrender.com/detect", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                bucket: "user-images"
+            })
+            });
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}: ${await response.text()}`);
+            }
+            const data1 = await response.json();
+            console.log("Detection result:", data1);
+            // Example call
+            res.status(200).json({})
     }
     catch (e){
         res.status(500).json({error: e.message});
@@ -76,33 +91,3 @@ conn.post('uploadImage',auth,async(req,res)=>{
 conn.listen(3000,()=>{
     console.log("Successfully running on port 3000");
 })
-
-function checkUser(){
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    const userId = localStorage.getItem('userId');
-
-    if (!isLoggedIn || !userId){
-        window.location.href('signup-new.html');
-        return false;
-    }
-    return true;
-}
-
-function logout(){
-    if (confirm('U sure?')){
-        localStorage.removeItem('userId');
-        localStorage.removeItem('userEmail');
-        localStorage.removeItem('isLoggedIn');
-        window.location.href('signin-new.html');
-    }
-}
-
-function logoutBtn(){
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    if (isLoggedIn){
-        const navigate = document.getElementById('logoutBtn');
-        if(navigate && !document.getElementById('logoutBtn')){
-
-        }
-    }
-}

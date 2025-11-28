@@ -224,5 +224,7 @@ async def get_all_ingredients():
         raise HTTPException(status_code=500, detail=f'Failed to fetch all ingredients: {e}')
 
 if __name__ == '__main__':
-    import uvicorn
-    uvicorn.run('cv:app', host='0.0.0.0', port=os.environ.get("PORT"), reload=True)
+    uvicorn.run('cv:app', host='0.0.0.0', port=8001, reload=True)
+    
+    
+#API URL https://smartplate-xics.onrender.com
