@@ -2,10 +2,12 @@ import { createClient } from "@supabase/supabase-js";
 import express from 'express';
 import cors from 'cors';
 import { supabase } from "../config/supabase";
-
+import multer from 'multer'
 const url= "https://vyxeojjzxwapzoevbrpb.supabase.co";
 const key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5eGVvamp6eHdhcHpvZXZicnBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNzY1OTYsImV4cCI6MjA3OTc1MjU5Nn0.zn1cG4IpjglAIpwVKNkHre2m3555qbJUwBMFZo-gB9M";
 const supabase = createClient(url,key);
+const upload = multer({ storage: multer.memoryStorage() });
+
 /*
 Necessary Endpoints and Pathway essentially
 All are POST
@@ -20,4 +22,58 @@ Additional Tasks:
 2. Integrating into Frontend (Taking the image and sending it off to the api, then displaying and asking the user to review ingredients)- Siddharth Nittur
 3. Integrating into Frontend (Recipe recommendations & Progress tracking) - Govind Nair
 */
+const conn = express();
+conn.use(cors({
+    origin: '*', // Allow all origins (or specify your frontend URL)
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+conn.use(express.json());
+async function auth(req, res, next) {
+    try {
+        const authHeader = req.headers["authorization"];
+        if (!authHeader) throw new Error("Missing Authorization header");
+
+        const token = authHeader.split(" ")[1];
+        const { data: { user }, error } = await supabase.auth.getUser(token);
+
+        if (error || !user) throw new Error("Invalid or expired token");
+        req.userId = user.id;
+        next();
+    } catch (err) {
+        return res.status(401).json({ error: err.message });
+    }
+}
+conn.post('uploadImage',auth,async(req,res)=>{
+    try{
+        const uuid= req.userId;
+        const file = req.file;
+        const date1 = new Date();
+        const date = date1.toString();
+        if (!file) {
+            return res.status(400).json({ error: "No file uploaded" });
+        }
+        
+        const filePath = `${uuid}/${date}`;
+        const { data, error } = await supabase.storage
+            .from("user-images")
+            .upload(filePath, file.buffer, {
+                contentType: file.mimetype,
+                upsert: true,
+            });
+        
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+        res.json({filePath: data.path});
+    }
+    catch (e){
+        res.status(500).json({error: e.message});
+    }
+    
+}); 
+conn.listen(3000,()=>{
+    console.log("Successfully running on port 3000");
+})
 
