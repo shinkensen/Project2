@@ -5,7 +5,7 @@ import { supabase } from "../config/supabase";
 import multer from 'multer'
 const url= "https://vyxeojjzxwapzoevbrpb.supabase.co";
 const key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5eGVvamp6eHdhcHpvZXZicnBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxNzY1OTYsImV4cCI6MjA3OTc1MjU5Nn0.zn1cG4IpjglAIpwVKNkHre2m3555qbJUwBMFZo-gB9M";
-const supabase = createClient(url,key);
+const supa = createClient(url,key);
 const upload = multer({ storage: multer.memoryStorage() });
 
 /*
@@ -36,7 +36,7 @@ async function auth(req, res, next) {
         if (!authHeader) throw new Error("Missing Authorization header");
 
         const token = authHeader.split(" ")[1];
-        const { data: { user }, error } = await supabase.auth.getUser(token);
+        const { data: { user }, error } = await supa.auth.getUser(token);
 
         if (error || !user) throw new Error("Invalid or expired token");
         req.userId = user.id;
@@ -56,7 +56,7 @@ conn.post('uploadImage',auth,async(req,res)=>{
         }
         
         const filePath = `${uuid}/${date}`;
-        const { data, error } = await supabase.storage
+        const { data, error } = await supa.storage
             .from("user-images")
             .upload(filePath, file.buffer, {
                 contentType: file.mimetype,
