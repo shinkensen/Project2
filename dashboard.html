@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartPlate - Dashboard</title>
+  <link rel="stylesheet" href="styles-new.css">
+  <style>
+    .dashboard-container {
+      min-height: 100vh;
+      background: var(--gray-50);
+    }
+
+    .dashboard-nav {
+      background: white;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 1rem 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .dashboard-main {
+      padding: 2rem 5%;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dashboard-card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin: 0;
+    }
+
+    /* Camera Section */
+    .camera-section {
+      grid-column: 1 / -1;
+    }
+
+    .camera-preview {
+      width: 100%;
+      max-width: 400px;
+      height: 300px;
+      background: var(--gray-100);
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      border: 2px dashed var(--gray-300);
+    }
+
+    .camera-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 0.5rem;
+    }
+
+    .camera-controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* Gallery Section */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .gallery-item {
+      background: var(--gray-100);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .gallery-image {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .gallery-info {
+      padding: 0.75rem;
+    }
+
+    .gallery-time {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+      margin-bottom: 0.25rem;
+    }
+
+    .gallery-count {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    /* Ingredients Table */
+    .ingredients-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .ingredients-table th,
+    .ingredients-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .ingredients-table th {
+      background: var(--gray-50);
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+
+    .expiry-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .expiry-soon {
+      background: var(--warning-light);
+      color: var(--warning);
+    }
+
+    .expiry-far {
+      background: var(--success-light);
+      color: var(--success);
+    }
+
+    .expiry-urgent {
+      background: var(--error-light);
+      color: var(--error);
+    }
+
+    /* Recipes Section */
+    .recipes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .recipe-card {
+      background: white;
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .recipe-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .recipe-image {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .recipe-content {
+      padding: 1rem;
+    }
+
+    .recipe-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--dark);
+    }
+
+    .recipe-ingredients {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+      margin-bottom: 1rem;
+    }
+
+    .recipe-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.875rem;
+      color: var(--gray-600);
+    }
+
+    /* Loading States */
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: var(--gray-500);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--gray-500);
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Navigation -->
+    <nav class="dashboard-nav">
+      <div class="nav-brand">
+        <h1 style="margin: 0;">🍽️ SmartPlate</h1>
+      </div>
+      <div class="nav-links">
+        <span id="userEmail" style="margin-right: 1rem; color: var(--gray-600);"></span>
+        <button onclick="logout()" class="btn btn-secondary">Sign Out</button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+      <!-- Upload Section -->
+      <section class="dashboard-card camera-section">
+        <div class="card-header">
+          <h2 class="card-title">📸 Scan Your Fridge</h2>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+          <div>
+            <div class="camera-preview" id="cameraPreview">
+              <div style="text-align: center; color: var(--gray-500);">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📷</div>
+                <div>No image selected</div>
+              </div>
+            </div>
+            <div class="camera-controls">
+              <input type="file" id="imageInput" accept="image/*" style="display: none;">
+              <button onclick="document.getElementById('imageInput').click()" class="btn btn-primary">
+                📁 Choose Image
+              </button>
+              <button onclick="uploadImage()" class="btn btn-accent" id="uploadBtn" disabled>
+                🔍 Analyze Fridge
+              </button>
+              <button onclick="clearImage()" class="btn btn-secondary">
+                🗑️ Clear
+              </button>
+            </div>
+            <div id="uploadStatus" style="margin-top: 1rem;"></div>
+          </div>
+          <div>
+            <h3 style="margin-bottom: 1rem;">How it works:</h3>
+            <ul style="color: var(--gray-600); line-height: 1.6;">
+              <li>Upload a clear photo of your fridge contents</li>
+              <li>Our AI will detect all food items automatically</li>
+              <li>Get expiration dates and storage recommendations</li>
+              <li>Receive smart recipe suggestions</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <div class="dashboard-grid">
+        <!-- Recent Scans Gallery -->
+        <section class="dashboard-card">
+          <div class="card-header">
+            <h2 class="card-title">🕒 Recent Scans</h2>
+            <button onclick="refreshGallery()" class="btn btn-secondary btn-small">🔄 Refresh</button>
+          </div>
+          <div class="gallery-grid" id="galleryGrid">
+            <div class="empty-state">
+              <div class="empty-state-icon">📸</div>
+              <div>No scans yet</div>
+              <div style="font-size: 0.875rem; margin-top: 0.5rem;">Upload your first fridge photo to get started!</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Current Ingredients -->
+        <section class="dashboard-card">
+          <div class="card-header">
+            <h2 class="card-title">📋 Current Ingredients</h2>
+            <button onclick="refreshIngredients()" class="btn btn-secondary btn-small">🔄 Refresh</button>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="ingredients-table">
+              <thead>
+                <tr>
+                  <th>Ingredient</th>
+                  <th>Expires In</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="ingredientsTable">
+                <tr>
+                  <td colspan="3" style="text-align: center; padding: 2rem; color: var(--gray-500);">
+                    No ingredients detected yet
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- Recipe Suggestions -->
+      <section class="dashboard-card">
+        <div class="card-header">
+          <h2 class="card-title">🍳 Recipe Suggestions</h2>
+          <button onclick="refreshRecipes()" class="btn btn-secondary btn-small">🔄 Refresh</button>
+        </div>
+        <div class="recipes-grid" id="recipesGrid">
+          <div class="empty-state">
+            <div class="empty-state-icon">🍳</div>
+            <div>No recipes yet</div>
+            <div style="font-size: 0.875rem; margin-top: 0.5rem;">Scan your fridge to get personalized recipes!</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Image Detail Modal -->
+  <div class="modal" id="imageModal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3 style="margin: 0;">Scan Details</h3>
+        <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+      </div>
+      <div id="modalDetails">
+        <!-- Details will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Recipe Detail Modal -->
+  <div class="modal" id="recipeModal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3 style="margin: 0;" id="recipeModalTitle">Recipe Details</h3>
+        <button onclick="closeRecipeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+      </div>
+      <div id="recipeModalContent">
+        <!-- Recipe details will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuration - Point to your actual backend
+    const BACKEND_URL = 'http://localhost:3000'; // Your backend.js server
+    const CV_SERVICE_URL = 'https://smartplate-xics.onrender.com'; // Your CV service
+    
+    let currentUser = null;
+    let selectedImage = null;
+
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+      currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      if (!currentUser) {
+        window.location.href = 'signin-new.html';
+        return;
+      }
+
+      document.getElementById('userEmail').textContent = currentUser.email;
+
+      // File input handler
+      document.getElementById('imageInput').addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+          const file = e.target.files[0];
+          selectedImage = file;
+          const preview = document.getElementById('cameraPreview');
+          preview.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="Preview">`;
+          document.getElementById('uploadBtn').disabled = false;
+        }
+      });
+
+      // Load initial data
+      loadGallery();
+      loadIngredients();
+      loadRecipes();
+    });
+
+    // Upload image for analysis - FIXED to use your actual backend
+    async function uploadImage() {
+      if (!selectedImage) return;
+
+      const uploadBtn = document.getElementById('uploadBtn');
+      const statusDiv = document.getElementById('uploadStatus');
+      
+      uploadBtn.disabled = true;
+      uploadBtn.innerHTML = '⏳ Uploading & Analyzing...';
+      statusDiv.innerHTML = '<div style="color: var(--info);">🔄 Uploading image and analyzing contents...</div>';
+
+      try {
+        const formData = new FormData();
+        formData.append('file', selectedImage);
+
+        const response = await fetch(`${BACKEND_URL}/uploadImage`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${currentUser.token}`
+          },
+          body: formData
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Upload failed');
+        }
+
+        const result = await response.json();
+        
+        statusDiv.innerHTML = `<div style="color: var(--success);">✅ Analysis complete! Found ${result.length} ingredients.</div>`;
+        
+        // Refresh all data
+        setTimeout(() => {
+          loadGallery();
+          loadIngredients();
+          loadRecipes();
+        }, 1000);
+        
+      } catch (error) {
+        console.error('Upload error:', error);
+        statusDiv.innerHTML = `<div style="color: var(--error);">❌ Error: ${error.message}</div>`;
+      } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = '🔍 Analyze Fridge';
+      }
+    }
+
+    // Load gallery of previous scans - FIXED to use your CV service
+    async function loadGallery() {
+      const galleryGrid = document.getElementById('galleryGrid');
+      
+      try {
+        const response = await fetch(`${CV_SERVICE_URL}/user-ingredients/${currentUser.id}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch scans');
+        }
+
+        const scans = await response.json();
+
+        if (scans.length === 0) {
+          galleryGrid.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📸</div>
+              <div>No scans yet</div>
+              <div style="font-size: 0.875rem; margin-top: 0.5rem;">Upload your first fridge photo to get started!</div>
+            </div>
+          `;
+          return;
+        }
+
+        galleryGrid.innerHTML = '';
+        scans.forEach(scan => {
+          const scanDate = new Date(scan.detected_at).toLocaleDateString();
+          const scanTime = new Date(scan.detected_at).toLocaleTimeString();
+          const ingredients = typeof scan.ingredients === 'string' ? 
+            JSON.parse(scan.ingredients) : scan.ingredients;
+          
+          const galleryItem = document.createElement('div');
+          galleryItem.className = 'gallery-item';
+          galleryItem.onclick = () => openModal(scan);
+          
+          galleryItem.innerHTML = `
+            <div class="gallery-image" style="background: var(--gray-200); display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 2rem;">📸</span>
+            </div>
+            <div class="gallery-info">
+              <div class="gallery-time">${scanDate} ${scanTime}</div>
+              <div class="gallery-count">${ingredients.length} items detected</div>
+            </div>
+          `;
+          
+          galleryGrid.appendChild(galleryItem);
+        });
+
+      } catch (error) {
+        console.error('Error loading gallery:', error);
+        galleryGrid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📸</div>
+            <div>No scans yet</div>
+            <div style="font-size: 0.875rem; margin-top: 0.5rem;">Upload your first fridge photo to get started!</div>
+          </div>
+        `;
+      }
+    }
+
+    // Load current ingredients - FIXED to use your CV service
+    async function loadIngredients() {
+      const tableBody = document.getElementById('ingredientsTable');
+      
+      try {
+        const response = await fetch(`${CV_SERVICE_URL}/user-ingredients/${currentUser.id}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch ingredients');
+        }
+
+        const scans = await response.json();
+        const allIngredients = [];
+        
+        scans.forEach(scan => {
+          const ingredients = typeof scan.ingredients === 'string' ? 
+            JSON.parse(scan.ingredients) : scan.ingredients;
+          ingredients.forEach(ing => {
+            allIngredients.push({
+              ...ing,
+              detected_at: scan.detected_at
+            });
+          });
+        });
+
+        // Deduplicate and sort by expiry
+        const uniqueIngredients = [...new Map(allIngredients.map(item => [item.name, item])).values()];
+        
+        if (uniqueIngredients.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 2rem; color: var(--gray-500);">No ingredients detected yet</td></tr>';
+          return;
+        }
+
+        tableBody.innerHTML = '';
+        uniqueIngredients.forEach(ingredient => {
+          const row = document.createElement('tr');
+          const expiryInfo = ingredient.expiration_info?.expiration_info;
+          const shelfLife = expiryInfo?.shelf_life_days || 7;
+          const expiryDate = new Date(new Date(ingredient.detected_at).getTime() + shelfLife * 24 * 60 * 60 * 1000);
+          const daysUntilExpiry = Math.ceil((expiryDate - new Date()) / (24 * 60 * 60 * 1000));
+          
+          let statusClass = 'expiry-far';
+          let statusText = `${daysUntilExpiry} days`;
+          
+          if (daysUntilExpiry <= 2) {
+            statusClass = 'expiry-urgent';
+            statusText = 'Expiring soon!';
+          } else if (daysUntilExpiry <= 7) {
+            statusClass = 'expiry-soon';
+            statusText = `${daysUntilExpiry} days`;
+          }
+
+          row.innerHTML = `
+            <td style="font-weight: 600; text-transform: capitalize;">${ingredient.name}</td>
+            <td>${expiryDate.toLocaleDateString()}</td>
+            <td><span class="expiry-badge ${statusClass}">${statusText}</span></td>
+          `;
+          
+          tableBody.appendChild(row);
+        });
+
+      } catch (error) {
+        console.error('Error loading ingredients:', error);
+        tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 2rem; color: var(--gray-500);">No ingredients detected yet</td></tr>';
+      }
+    }
+
+    // Load recipe suggestions - FIXED with working recipes
+    async function loadRecipes() {
+      const recipesGrid = document.getElementById('recipesGrid');
+      
+      try {
+        // For now, use demo recipes - you can replace this with your recipe API later
+        const recipes = [
+          {
+            id: 1,
+            title: "Fresh Fruit Salad",
+            image: "https://images.unsplash.com/photo-1564093497595-593b96d80180?w=400&h=300&fit=crop",
+            ingredients: ["apple", "banana", "orange"],
+            time: "10 mins",
+            difficulty: "Easy",
+            instructions: "Chop all fruits into bite-sized pieces. Mix together in a bowl. Serve chilled for best taste. You can add a squeeze of lemon juice to prevent browning."
+          },
+          {
+            id: 2,
+            title: "Vegetable Stir Fry",
+            image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop",
+            ingredients: ["broccoli", "carrot"],
+            time: "20 mins",
+            difficulty: "Easy",
+            instructions: "Heat oil in a wok. Add chopped vegetables and stir fry for 5-7 minutes. Add soy sauce and garlic to taste. Serve hot with rice or noodles."
+          },
+          {
+            id: 3,
+            title: "Fruit Smoothie Bowl",
+            image: "https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=400&h=300&fit=crop",
+            ingredients: ["banana", "apple"],
+            time: "5 mins",
+            difficulty: "Easy",
+            instructions: "Blend fruits with a splash of milk or yogurt until smooth. Pour into a bowl and top with your favorite toppings like granola, nuts, or honey."
+          }
+        ];
+
+        if (recipes.length === 0) {
+          recipesGrid.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🍳</div>
+              <div>No recipes yet</div>
+              <div style="font-size: 0.875rem; margin-top: 0.5rem;">Scan your fridge to get personalized recipes!</div>
+            </div>
+          `;
+          return;
+        }
+
+        recipesGrid.innerHTML = '';
+        recipes.forEach(recipe => {
+          const recipeCard = document.createElement('div');
+          recipeCard.className = 'recipe-card';
+          recipeCard.onclick = () => openRecipeModal(recipe);
+          recipeCard.innerHTML = `
+            <img src="${recipe.image}" alt="${recipe.title}" class="recipe-image">
+            <div class="recipe-content">
+              <div class="recipe-title">${recipe.title}</div>
+              <div class="recipe-ingredients">Uses: ${recipe.ingredients.join(', ')}</div>
+              <div class="recipe-meta">
+                <span>⏱️ ${recipe.time}</span>
+                <span>📊 ${recipe.difficulty}</span>
+              </div>
+            </div>
+          `;
+          recipesGrid.appendChild(recipeCard);
+        });
+
+      } catch (error) {
+        console.error('Error loading recipes:', error);
+        recipesGrid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🍳</div>
+            <div>No recipes yet</div>
+            <div style="font-size: 0.875rem; margin-top: 0.5rem;">Scan your fridge to get personalized recipes!</div>
+          </div>
+        `;
+      }
+    }
+
+    // Modal functions
+    function openModal(scan) {
+      const modal = document.getElementById('imageModal');
+      const modalDetails = document.getElementById('modalDetails');
+      
+      const ingredients = typeof scan.ingredients === 'string' ? 
+        JSON.parse(scan.ingredients) : scan.ingredients;
+      
+      let detailsHTML = `
+        <div style="margin-bottom: 1rem;">
+          <strong>Scanned on:</strong> ${new Date(scan.detected_at).toLocaleString()}
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <strong>Ingredients detected:</strong>
+        </div>
+        <div style="max-height: 300px; overflow-y: auto;">
+      `;
+
+      ingredients.forEach(ingredient => {
+        const expiryInfo = ingredient.expiration_info?.expiration_info;
+        detailsHTML += `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--gray-200);">
+            <div>
+              <span style="text-transform: capitalize; font-weight: 600;">${ingredient.name}</span>
+              <div style="font-size: 0.875rem; color: var(--gray-600);">
+                Confidence: ${(ingredient.score * 100).toFixed(1)}%
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 0.875rem; color: var(--gray-600);">
+                ${expiryInfo?.shelf_life_days ? `Shelf life: ${expiryInfo.shelf_life_days} days` : 'No expiry data'}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      detailsHTML += '</div>';
+      modalDetails.innerHTML = detailsHTML;
+      modal.style.display = 'flex';
+    }
+
+    function openRecipeModal(recipe) {
+      const modal = document.getElementById('recipeModal');
+      const title = document.getElementById('recipeModalTitle');
+      const content = document.getElementById('recipeModalContent');
+      
+      title.textContent = recipe.title;
+      content.innerHTML = `
+        <img src="${recipe.image}" alt="${recipe.title}" style="width: 100%; border-radius: 0.5rem; margin-bottom: 1rem;">
+        <div style="margin-bottom: 1rem;">
+          <strong>Ingredients:</strong> ${recipe.ingredients.join(', ')}
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <strong>Time:</strong> ${recipe.time} • <strong>Difficulty:</strong> ${recipe.difficulty}
+        </div>
+        <div>
+          <strong>Instructions:</strong>
+          <p style="margin-top: 0.5rem; color: var(--gray-600); line-height: 1.6;">${recipe.instructions}</p>
+        </div>
+      `;
+      modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('imageModal').style.display = 'none';
+    }
+
+    function closeRecipeModal() {
+      document.getElementById('recipeModal').style.display = 'none';
+    }
+
+    function clearImage() {
+      selectedImage = null;
+      document.getElementById('cameraPreview').innerHTML = `
+        <div style="text-align: center; color: var(--gray-500);">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">📷</div>
+          <div>No image selected</div>
+        </div>
+      `;
+      document.getElementById('uploadBtn').disabled = true;
+      document.getElementById('uploadStatus').innerHTML = '';
+    }
+
+    // Refresh functions
+    function refreshGallery() { loadGallery(); }
+    function refreshIngredients() { loadIngredients(); }
+    function refreshRecipes() { loadRecipes(); }
+
+    // Logout
+    function logout() {
+      localStorage.removeItem('currentUser');
+      window.location.href = 'signin-new.html';
+    }
+
+    // Close modals on outside click
+    document.getElementById('imageModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
+
+    document.getElementById('recipeModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeRecipeModal();
+      }
+    });
+  </script>
+</body>
+</html>

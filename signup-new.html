@@ -86,36 +86,6 @@
     </div>
   </div>
 
-  <script type="module" src="js/signup.js"></script>
-  <script>
-    // Password validation
-    const form = document.getElementById('signupForm');
-    const password = document.getElementById('password');
-    const confirmPassword = document.getElementById('confirmPassword');
-    const errorMessage = document.getElementById('errorMessage');
-
-    form.addEventListener('submit', function(e) {
-      // Check password match
-      if (password.value !== confirmPassword.value) {
-        e.preventDefault();
-        errorMessage.textContent = 'Passwords do not match';
-        errorMessage.style.display = 'block';
-        confirmPassword.focus();
-        return;
-      }
-
-      // Add loading state
-      const btn = this.querySelector('button[type="submit"]');
-      btn.classList.add('btn-loading');
-      btn.disabled = true;
-    });
-
-    // Clear error on input
-    [password, confirmPassword].forEach(input => {
-      input.addEventListener('input', () => {
-        errorMessage.style.display = 'none';
-      });
-    });
-  </script>
+  <script type="module" src="signup.js"></script>
 </body>
 </html>
