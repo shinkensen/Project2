@@ -103,21 +103,23 @@ conn.post('/login',async(req,res) =>{
     }
 })
 conn.post('/signup', async (req, res) => {
+    console.log("Received");
     try {
         const { email, password } = req.body;
         if (!email || !password) {
+            console.log("Error1");
             return res.status(400).json({ error: 'Email and password are required.' });
         }
-
+        console.log("Stage 1")
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
         });
-
         if (error) {
+            console.log(error);
             return res.status(400).json({ error: error.message || 'Unable to create account.' });
         }
-
+        console.log("Stage 2")
         let token = data?.session?.access_token || null;
 
         if (!token) {
@@ -130,16 +132,17 @@ conn.post('/signup', async (req, res) => {
                 token = loginData?.session?.access_token || null;
             }
         }
-
+        console.log("Stage 3");
         if (!token) {
             return res.status(202).json({
                 message: 'Account created',
-                requiresVerification: true,
+                requiresVerification: false,
             });
         }
-
+        console.log("Passed")
         return res.status(200).json({ token });
     } catch (err) {
+        console.log("Failed")
         return res.status(500).json({ error: err.message || 'Unexpected signup error.' });
     }
 });
