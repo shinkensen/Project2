@@ -29,6 +29,12 @@ conn.use(cors({
     credentials: true
 }));
 conn.use(express.json());
+
+// Log all incoming requests
+conn.use((req, res, next) => {
+    console.log(`${req.method} ${req.path}`);
+    next();
+});
 async function auth(req, res, next) {
     try {
         const authHeader = req.headers["authorization"];
@@ -91,15 +97,19 @@ conn.post('/uploadImage',auth,async(req,res)=>{
     
 });
 conn.post('/login',async(req,res) =>{
-    const {data,error}  = await supabase.auth.signInWithPassword({
-        email: req.body.email,
-        password: req.body.password, 
-    });
-    if (error){
-        return res.status(500).json({error: error});
-    }
-    else{
+    try {
+        const {data,error}  = await supabase.auth.signInWithPassword({
+            email: req.body.email,
+            password: req.body.password, 
+        });
+        if (error){
+            console.log("Login error:", error);
+            return res.status(400).json({error: error.message || 'Invalid credentials'});
+        }
         return res.status(200).json({token: data.session.access_token});
+    } catch (err) {
+        console.log("Login exception:", err);
+        return res.status(500).json({error: err.message || 'Unexpected login error.'});
     }
 })
 conn.post('/signup', async (req, res) => {
