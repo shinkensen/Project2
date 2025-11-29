@@ -99,7 +99,7 @@ conn.post('/login',async(req,res) =>{
         return res.status(500).json({error: error});
     }
     else{
-        return res.status(200).json({user: data.user});
+        return res.status(200).json({token: data.session.access_token});
     }
 })
 conn.post('/signup',async(req,res)=>{
@@ -111,7 +111,7 @@ conn.post('/signup',async(req,res)=>{
         return res.status(500).json({error: error});
     }
     else{
-        return res.status(200).json({user: data.user});
+        return res.status(200).json({token: data.session.access_token});
     }
 })
 conn.listen(3000,()=>{
