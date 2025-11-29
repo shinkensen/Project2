@@ -102,18 +102,47 @@ conn.post('/login',async(req,res) =>{
         return res.status(200).json({token: data.session.access_token});
     }
 })
-conn.post('/signup',async(req,res)=>{
-    const {data,error} = await supabase.auth.signUp({
-        email: req.body.email,
-        password: req.body.password,
-    })
-    if (error){
-        return res.status(500).json({error: error});
+conn.post('/signup', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required.' });
+        }
+
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+        });
+
+        if (error) {
+            return res.status(400).json({ error: error.message || 'Unable to create account.' });
+        }
+
+        let token = data?.session?.access_token || null;
+
+        if (!token) {
+            const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (!loginError) {
+                token = loginData?.session?.access_token || null;
+            }
+        }
+
+        if (!token) {
+            return res.status(202).json({
+                message: 'Account created',
+                requiresVerification: true,
+            });
+        }
+
+        return res.status(200).json({ token });
+    } catch (err) {
+        return res.status(500).json({ error: err.message || 'Unexpected signup error.' });
     }
-    else{
-        return res.status(200).json({token: data.session.access_token});
-    }
-})
+});
 conn.listen(3000,()=>{
     console.log("Successfully running on port 3000");
 })

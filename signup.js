@@ -1,65 +1,95 @@
-// js/signup.js
-document.addEventListener('DOMContentLoaded', function() {
+const API_BASE_URL = "https://smartplateapi.onrender.com";
+
+document.addEventListener('DOMContentLoaded', () => {
     const signupForm = document.getElementById('signupForm');
     const errorMessage = document.getElementById('errorMessage');
 
-    signupForm.addEventListener('submit', async function(e) {
-        e.preventDefault(); // Prevent page reload
-        
-        const formData = {
-            fullName: document.getElementById('fullName').value,
-            email: document.getElementById('email').value,
-            password: document.getElementById('password').value
-        };
+    if (!signupForm) {
+        return;
+    }
 
-        // Show loading state
-        const btn = this.querySelector('button[type="submit"]');
+    signupForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const btn = signupForm.querySelector('button[type="submit"]');
+        const fullName = document.getElementById('fullName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        errorMessage.style.display = 'none';
         btn.classList.add('btn-loading');
         btn.disabled = true;
-        errorMessage.style.display = 'none';
+
+        if (password !== confirmPassword) {
+            showError('Passwords do not match.');
+            resetButton(btn);
+            return;
+        }
 
         try {
-            // For now, we'll simulate successful signup
-            // In production, you'd call your backend API here
-            await simulateSignup(formData);
-            
-            // Store user data and redirect to signin
-            localStorage.setItem('tempUser', JSON.stringify({
-                email: formData.email,
-                fullName: formData.fullName
-            }));
-            
-            // Redirect to signin page
-            window.location.href = 'signin-new.html';
-            
+            const response = await fetch(`${API_BASE_URL}/signup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const payload = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                throw new Error(parseServerError(payload, 'Unable to create your account right now.'));
+            }
+
+            if (payload.requiresVerification) {
+                showError(payload.message || 'Account created. Please verify your email before signing in.');
+                resetButton(btn);
+                return;
+            }
+
+            if (!payload.token) {
+                throw new Error('Signup succeeded but no session token was returned.');
+            }
+
+            localStorage.setItem('token', payload.token);
+            localStorage.setItem('userEmail', email);
+            if (fullName) {
+                localStorage.setItem('userName', fullName);
+            }
+
+            window.location.href = 'dashboard.html';
         } catch (error) {
-            errorMessage.textContent = error.message;
-            errorMessage.style.display = 'block';
-        } finally {
-            btn.classList.remove('btn-loading');
-            btn.disabled = false;
+            showError(error.message || 'Unable to create your account.');
+            resetButton(btn);
         }
     });
 
-    // Simulate API call - replace with actual Supabase/auth0/your backend
-    async function simulateSignup(userData) {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                // Simple validation
-                if (!userData.email || !userData.password) {
-                    reject(new Error('Please fill in all fields'));
-                    return;
-                }
-                
-                if (userData.password.length < 6) {
-                    reject(new Error('Password must be at least 6 characters'));
-                    return;
-                }
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+    }
 
-                // Simulate successful signup
-                console.log('User signed up:', userData);
-                resolve({ success: true, user: userData });
-            }, 1000);
-        });
+    function resetButton(btn) {
+        btn.classList.remove('btn-loading');
+        btn.disabled = false;
     }
 });
+
+function parseServerError(payload, fallbackMessage) {
+    if (!payload) {
+        return fallbackMessage;
+    }
+
+    if (typeof payload.error === 'string' && payload.error.trim().length > 0) {
+        return payload.error;
+    }
+
+    if (payload.error && typeof payload.error.message === 'string') {
+        return payload.error.message;
+    }
+
+    if (typeof payload.message === 'string' && payload.message.trim().length > 0) {
+        return payload.message;
+    }
+
+    return fallbackMessage;
+}
